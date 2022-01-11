@@ -30,6 +30,7 @@ class ARCameraView: UIViewController {
         scene.alpha = 0
         scene.allowsCameraControl = true
         scene.cameraControlConfiguration.allowsTranslation = false
+        scene.autoenablesDefaultLighting = true
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.didTapOnSceneView))
         scene.addGestureRecognizer(tap)
         return scene
@@ -86,7 +87,6 @@ class ARCameraView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) { [weak self] in
             UIView.animate(withDuration: 0.2) {
                 self?.sceneView.alpha = 1
@@ -123,6 +123,7 @@ class ARCameraView: UIViewController {
                              constant: -5)
             sceneView.setRight(with: self.view.safeAreaLayoutGuide.rightAnchor,
                                constant: -10)
+            
         } else {
             self.view.addSubview(errorLabel)
             errorLabel.setFullOnSuperView(withSpacing: 10)
@@ -130,7 +131,7 @@ class ARCameraView: UIViewController {
     }
     
     private func startLiveMesh() {
-        self.timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        self.timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             self.queue.async {
                 if let device = MTLCreateSystemDefaultDevice(),
@@ -140,14 +141,13 @@ class ARCameraView: UIViewController {
                     try? meshAnchors.save(to: filename, device: device)
                     let asset = MDLAsset(url: filename)
                     let scene = SCNScene(mdlAsset: asset)
+                    if let object = asset.object(at: 0) as? MDLMesh {
+                        let modelNode = SCNNode(mdlObject: object)
+                        scene.rootNode.addChildNode(modelNode)
+                        //modelNode.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
+                        self.sceneView.scene = scene
+                    }
                     
-                    let cameraNode = SCNNode()
-                    cameraNode.name = self.realTimeObjectName
-                    cameraNode.camera = SCNCamera()
-                   // cameraNode.position = .init(asset.boundingBox.maxBounds.z, 0, 0)
-                    scene.rootNode.addChildNode(cameraNode)
-                    
-                    self.sceneView.scene = scene
                 }
             }
         }
@@ -180,28 +180,81 @@ class ARCameraView: UIViewController {
         guard sender.state == .ended else { return }
         if let result = results.first {
             let current = result.localCoordinates
-            if let prev = previousTouch {
-                let alert = UIAlertController(title: "Distance is \(distanceTravelled(between: prev, and: current))",
-                                              message: nil, preferredStyle: .alert)
-                alert.addAction(.init(title: "Hide", style: .default, handler: nil))
-                self.present(alert, animated: true) {
-                    self.previousTouch = nil
-                }
+            let dot = SCNNode(geometry: SCNBox(width: 0.05,
+                                               height: 0.05,
+                                               length: 0.05,
+                                               chamferRadius: 0.05))
+            dot.position = current
+            self.sceneView.scene?.rootNode.addChildNode(dot)
+            if let prev = previousTouch, let scene = self.sceneView.scene {
+                let line = lineBetweenNodeA(positionA: current, positionB: prev, inScene: scene)
+                scene.rootNode.addChildNode(line)
+                self.add(text: "\(distanceTravelled(between: current, and: prev))",
+                         on: scene.rootNode,
+                         atPosition: line.position)
             }
             previousTouch = current
-            print(result.localCoordinates)
+            
         }
     }
     
-    func distanceTravelled(between v1: SCNVector3, and v2: SCNVector3) -> Float {
-        let xDist = v1.x - v2.x
-        let yDist = v1.y - v2.y
-        let zDist = v1.z - v2.z
-        func distanceTravelled(xDist: Float, yDist: Float, zDist: Float) -> Float{
-            return sqrt((xDist*xDist)+(yDist*yDist)+(zDist*zDist))
-        }
-        return distanceTravelled(xDist: xDist, yDist: yDist, zDist: zDist)
+    func distanceTravelled(between positionA: SCNVector3, and positionB: SCNVector3) -> Float {
+        let vector = SCNVector3(positionA.x - positionB.x,
+                                positionA.y - positionB.y,
+                                positionA.z - positionB.z)
+        return sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
     }
-
+    
+    func lineBetweenNodeA(positionA: SCNVector3,
+                          positionB: SCNVector3,
+                          inScene: SCNScene) -> SCNNode {
+        let midPosition = SCNVector3 (x:(positionA.x + positionB.x) / 2,
+                                      y:(positionA.y + positionB.y) / 2,
+                                      z:(positionA.z + positionB.z) / 2)
+        
+        let lineGeometry = SCNCylinder()
+        lineGeometry.radius = 0.015
+        lineGeometry.height = CGFloat(distanceTravelled(between: positionA, and: positionB))
+        lineGeometry.radialSegmentCount = 5
+        lineGeometry.firstMaterial!.diffuse.contents = UIColor.white
+        
+        let lineNode = SCNNode(geometry: lineGeometry)
+        lineNode.position = midPosition
+        lineNode.look(at: positionB,
+                      up: inScene.rootNode.worldUp,
+                      localFront: lineNode.worldUp)
+        return lineNode
+    }
+    
+    func add(text string: String, on node: SCNNode,
+             atPosition: SCNVector3) {
+        let layer = CALayer()
+        layer.frame = CGRect(x: 0, y: 10, width: 50, height: 25)
+        layer.backgroundColor = UIColor.white.cgColor
+        
+        let textLayer = CATextLayer()
+        textLayer.frame = layer.bounds
+        textLayer.fontSize = layer.bounds.size.height/3
+        textLayer.string = string
+        textLayer.alignmentMode = .center
+        textLayer.foregroundColor = UIColor.black.cgColor
+        textLayer.display()
+        layer.addSublayer(textLayer)
+        
+        let geometry = SCNBox(width: 0.2,
+                              height: 0.05,
+                              length: 0.2,
+                              chamferRadius: 0.0)
+        
+        geometry.firstMaterial?.locksAmbientWithDiffuse = true
+        geometry.firstMaterial?.diffuse.contents = layer
+        
+        let geometryNode = SCNNode(geometry: geometry)
+        geometryNode.position = atPosition
+        
+        node.addChildNode(geometryNode)
+    }
+    
 }
+
 

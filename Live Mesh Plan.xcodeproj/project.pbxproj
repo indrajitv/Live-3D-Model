@@ -15,6 +15,7 @@
 		A5517E0E2759EBD4008C8C9D /* ARCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5517E0B2759EBD4008C8C9D /* ARCameraView.swift */; };
 		A5517E0F2759EBD4008C8C9D /* ARCameraView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5517E0C2759EBD4008C8C9D /* ARCameraView+Extensions.swift */; };
 		A5517E102759EBD4008C8C9D /* APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5517E0D2759EBD4008C8C9D /* APIRequest.swift */; };
+		AB56C8BA2786A5F60023E31A /* Add3DScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB56C8B92786A5F60023E31A /* Add3DScene.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		A5517E0B2759EBD4008C8C9D /* ARCameraView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ARCameraView.swift; sourceTree = "<group>"; };
 		A5517E0C2759EBD4008C8C9D /* ARCameraView+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ARCameraView+Extensions.swift"; sourceTree = "<group>"; };
 		A5517E0D2759EBD4008C8C9D /* APIRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIRequest.swift; sourceTree = "<group>"; };
+		AB56C8B92786A5F60023E31A /* Add3DScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Add3DScene.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				A5517E082759EBCC008C8C9D /* Acnhors.swift */,
+				AB56C8B92786A5F60023E31A /* Add3DScene.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -168,6 +171,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A5517E102759EBD4008C8C9D /* APIRequest.swift in Sources */,
+				AB56C8BA2786A5F60023E31A /* Add3DScene.swift in Sources */,
 				A5517DF42759EBBC008C8C9D /* AppDelegate.swift in Sources */,
 				A5517E0F2759EBD4008C8C9D /* ARCameraView+Extensions.swift in Sources */,
 				A5517E0E2759EBD4008C8C9D /* ARCameraView.swift in Sources */,
@@ -313,7 +317,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = G2CU65X6LJ;
+				DEVELOPMENT_TEAM = RM4RHUJ8B4;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Live Mesh Plan/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

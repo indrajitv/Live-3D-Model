@@ -5,8 +5,6 @@
 //  Created by Indrajit Chavda on 12/10/21.
 //
 
-import Foundation
-import UIKit
 import ARKit
 import simd
 import MetalKit
