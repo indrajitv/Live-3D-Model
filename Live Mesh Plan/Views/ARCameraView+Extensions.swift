@@ -11,11 +11,11 @@ import MetalKit
 
 extension ARCameraView: ARCoachingOverlayViewDelegate {
     func coachingOverlayViewWillActivate(_ coachingOverlayView: ARCoachingOverlayView) {
-        buttonExportScan.isHidden = true
+        buttonFinish.isHidden = true
     }
 
     func coachingOverlayViewDidDeactivate(_ coachingOverlayView: ARCoachingOverlayView) {
-        buttonExportScan.isHidden = false
+        buttonFinish.isHidden = false
     }
     
 }
